@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cobalt Intelligence Marketing Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --purple: #6366F1;
+  --purple-deep: #9F93E2;
+  --bg-dark: #0B0915;
+  --bg-light: #FAFAFF;
+  --navy: #0F172A;
+  --slate: #1E293B;
+  --card: #ffffff;
+  --text: #0F172A;
+  --text-secondary: #64748B;
+  --muted: #94a3b8;
+  --border: #e2e8f0;
+  --green: #059669;
+  --red: #DC2626;
+  --amber: #D97706;
+  --blue: #0047AB;
+  --blue-light: #2563C8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-light);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+h1, h2, h3, .brand-title { font-family: 'Sora', sans-serif; }
+
+/* Header */
+.site-header {
+  background: linear-gradient(135deg, var(--bg-dark), #1a1035);
+  color: white;
+  padding: 28px 40px 16px;
+  text-align: center;
+}
+.brand-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--purple-deep), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.brand-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 4px;
+}
+
+/* Tab Navigation */
+.tab-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #ffffff;
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+}
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--muted);
+  padding: 14px 20px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  text-align: center;
+}
+.tab-btn:hover { color: var(--purple); background: rgba(99,102,241,0.04); }
+.tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); font-weight: 600; }
+
+/* Tab Content */
+.tab-content { display: none; padding: 32px 40px 60px; max-width: 1400px; margin: 0 auto; }
+.tab-content.active { display: block; }
+
+/* KPI Cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+.kpi {
+  background: var(--card);
+  padding: 22px 24px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+}
+.kpi .label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-secondary); font-weight: 600;
+}
+.kpi .value {
+  font-size: 30px; font-weight: 700; margin-top: 8px;
+  color: var(--navy); letter-spacing: -0.02em;
+  font-family: 'Sora', sans-serif;
+}
+.kpi .delta { margin-top: 6px; font-size: 12px; font-weight: 500; }
+.delta.up { color: var(--green); }
+.delta.down { color: var(--red); }
+.delta.flat { color: var(--muted); }
+
+/* Charts */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+  gap: 24px;
+}
+.chart-card {
+  background: var(--card);
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+}
+.chart-card.full { grid-column: 1 / -1; }
+.chart-card h3 {
+  margin: 0 0 16px; font-size: 15px; font-weight: 600; color: var(--navy);
+  font-family: 'Sora', sans-serif;
+}
+.chart-card canvas { max-height: 300px; }
+
+/* Tables */
+.table-card {
+  background: var(--card);
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+  margin-top: 28px;
+  overflow-x: auto;
+}
+.table-card h3 {
+  margin: 0 0 16px; font-size: 15px; font-weight: 600; color: var(--navy);
+  font-family: 'Sora', sans-serif;
+}
+table.kpi-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.kpi-table th, table.kpi-table td {
+  padding: 10px 14px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+table.kpi-table th:first-child, table.kpi-table td:first-child { text-align: left; }
+table.kpi-table thead th {
+  background: #f8fafc; font-weight: 600; color: var(--navy); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.04em; position: sticky; top: 0;
+}
+table.kpi-table tbody tr:hover { background: #f8fafc; }
+table.kpi-table td a { color: var(--purple); text-decoration: none; }
+table.kpi-table td a:hover { text-decoration: underline; }
+
+/* Sub-view toggles */
+.toggle {
+  display: inline-flex;
+  background: rgba(99,102,241,0.08);
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+.toggle button {
+  background: transparent;
+  border: 0;
+  color: var(--text-secondary);
+  padding: 8px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.toggle button.active { background: var(--purple); color: white; }
+
+/* Pills and badges */
+.pill {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+}
+.pill-purple { background: rgba(99,102,241,0.1); color: var(--purple); }
+.pill-green { background: rgba(5,150,105,0.1); color: var(--green); }
+.pill-amber { background: rgba(217,119,6,0.1); color: var(--amber); }
+.pill-red { background: rgba(220,38,38,0.1); color: var(--red); }
+.pill-gray { background: rgba(148,163,184,0.15); color: var(--text-secondary); }
+
+.peak-row td { background: #ecfdf5 !important; font-weight: 700; }
+
+/* Status line */
+.status { font-size: 12px; color: var(--muted); text-align: right; margin-top: 20px; }
+.loading { text-align: center; padding: 60px; color: var(--muted); }
+.err { background: #fef2f2; color: #991b1b; padding: 20px; border-radius: 10px; border: 1px solid #fecaca; }
+
+/* Section header inside tabs */
+.section-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+.section-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+/* Month color palette for table rows */
+.month-0  { background: #dbeafe; } .month-1  { background: #fef3c7; }
+.month-2  { background: #dcfce7; } .month-3  { background: #fce7f3; }
+.month-4  { background: #ede9fe; } .month-5  { background: #ffedd5; }
+.month-6  { background: #cffafe; } .month-7  { background: #fef9c3; }
+.month-8  { background: #f3e8ff; } .month-9  { background: #ffe4e6; }
+.month-10 { background: #d1fae5; } .month-11 { background: #e0e7ff; }
+
+/* YoY grid */
+.yoy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+@media (max-width: 900px) { .yoy-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .yoy-grid { grid-template-columns: 1fr; } }
+.month-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 18px; padding: 28px 30px;
+  box-shadow: 0 2px 6px rgba(15,23,42,0.05);
+}
+.month-card h4 {
+  margin: 0 0 18px; font-size: 22px; font-weight: 800;
+  color: var(--navy); text-transform: uppercase; letter-spacing: 0.08em;
+  padding-bottom: 12px; border-bottom: 3px solid var(--border);
+  font-family: 'Sora', sans-serif;
+}
+.month-card table { width: 100%; border-collapse: collapse; }
+.month-card th {
+  text-align: right; color: var(--muted); font-weight: 700;
+  padding: 8px 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.month-card th:first-child { text-align: left; }
+.month-card td { padding: 12px 4px; text-align: right; font-weight: 700; color: var(--navy); font-size: 24px; }
+.month-card td:first-child { text-align: left; color: var(--muted); font-weight: 600; font-size: 16px; }
+.month-card tr.current td { color: var(--purple); font-weight: 800; }
+.month-card .pct { display: block; font-size: 12px; font-weight: 700; margin-top: 4px; }
+.month-card .pct.up { color: var(--green); }
+.month-card .pct.down { color: var(--red); }
+.month-card .pct.flat { color: var(--muted); }
+.month-card .global-peak, .month-card .global-low {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; height: 44px; padding: 0 8px; border-radius: 50%; font-weight: 800;
+}
+.month-card .global-peak { background: rgba(16,185,129,0.25); color: #047857 !important; }
+.month-card .global-low  { background: rgba(239,68,68,0.22);  color: #b91c1c !important; }
+
+/* Week Grid */
+.legend { display: flex; gap: 18px; flex-wrap: wrap; margin: 0 0 16px; font-size: 12px; color: var(--muted); font-weight: 600; }
+.legend .dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.legend .dot.peak-light { background: rgba(5,150,105,0.28); }
+.legend .dot.peak-solid { background: rgba(5,150,105,0.55); }
+.legend .dot.low { background: rgba(220,38,38,0.28); }
+
+table.week-grid { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.week-grid th, table.week-grid td { padding: 10px 8px; text-align: center; border: 1px solid var(--border); white-space: nowrap; }
+table.week-grid thead th { background: var(--navy); color: white; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+table.week-grid thead th.total-col { background: var(--purple); }
+table.week-grid td.month-label { font-weight: 800; color: var(--navy); font-size: 15px; text-align: left; padding-left: 14px; }
+table.week-grid td.year-label { font-weight: 700; color: var(--muted); text-align: left; padding-left: 10px; }
+table.week-grid tr.current td { background: #eff6ff; }
+table.week-grid td.booked-cell { color: var(--navy); font-weight: 700; font-size: 15px; }
+table.week-grid td.acct-cell { color: var(--purple); font-weight: 700; font-size: 15px; }
+table.week-grid td.total-cell { background: #f0f9ff; font-weight: 800; color: var(--navy); font-size: 15px; }
+table.week-grid .pct-sm { display: block; font-size: 10px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+table.week-grid tr td.peak, table.week-grid tr.current td.peak {
+  position: relative;
+  background: radial-gradient(circle at center, rgba(16,185,129,0.28) 0%, rgba(16,185,129,0.28) 44%, transparent 45%) !important;
+}
+table.week-grid td.peak .peak-num { display: inline-block; color: #047857; font-weight: 800; }
+table.week-grid td.total-cell.peak-year, table.week-grid td.peak-year {
+  background: radial-gradient(circle at center, rgba(5,150,105,0.55) 0%, rgba(5,150,105,0.55) 46%, transparent 47%) !important;
+}
+table.week-grid td.peak-year .peak-num { color: #ffffff; font-weight: 900; }
+table.week-grid tr.peak-summary td {
+  background: #ecfdf5; color: #047857; font-weight: 800;
+  font-size: 14px; border-top: 2px solid var(--navy);
+}
+table.week-grid tr.peak-summary td.label {
+  text-align: right; color: var(--navy); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+/* Newsletter-specific */
+table.kpi-table th:nth-child(2), table.kpi-table td:nth-child(2) { text-align: left; }
+table.kpi-table td:nth-child(2) { white-space: normal; max-width: 360px; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .tab-btn { padding: 10px 8px; font-size: 12px; }
+  .site-header { padding: 20px 16px 12px; }
+  .tab-content { padding: 20px 16px 40px; }
+  .chart-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="brand-title">Cobalt Intelligence Marketing Dashboard</div>
+  <div class="brand-sub">SEO, Newsletter &amp; Blog Performance</div>
+</div>
+
+<nav class="tab-bar">
+  <button class="tab-btn active" data-tab="seo" onclick="switchTab('seo')">SEO</button>
+  <button class="tab-btn" data-tab="newsletter" onclick="switchTab('newsletter')">Newsletter</button>
+  <button class="tab-btn" data-tab="blog" onclick="switchTab('blog')">Blog</button>
+</nav>
+
+<!-- ==================== SEO TAB ==================== -->
+<div id="tab-seo" class="tab-content active">
+  <div class="section-title">SEO Performance</div>
+  <div class="section-sub" id="seo-sub">Live from SEO KPI Tracker 2026</div>
+
+  <div class="toggle" id="seo-toggle">
+    <button id="btn-weekly" class="active" onclick="setSeoView('weekly')">Weekly</button>
+    <button id="btn-monthly" onclick="setSeoView('monthly')">Monthly</button>
+    <button id="btn-yoy" onclick="setSeoView('yoy')">Year-over-Year</button>
+    <button id="btn-wg-booked" onclick="setSeoView('wg-booked')">Booked Grid</button>
+    <button id="btn-wg-accounts" onclick="setSeoView('wg-accounts')">Accounts Grid</button>
+  </div>
+
+  <div id="seo-loading" class="loading">Loading SEO data...</div>
+  <div id="seo-dashboard" style="display:none;">
+    <div id="seo-weekgrid-view" style="display:none;">
+      <h3 id="seo-weekgrid-title" style="margin:0 0 12px; color:var(--navy);"></h3>
+      <div class="legend">
+        <span><span class="dot peak-light"></span>Row peak week</span>
+        <span><span class="dot peak-solid"></span>Year top month</span>
+      </div>
+      <div class="table-card" style="margin-top:0;">
+        <table class="week-grid">
+          <thead id="seo-weekgrid-head"></thead>
+          <tbody id="seo-weekgrid-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="seo-yoy-view" style="display:none;">
+      <h3 style="margin:0 0 12px; color:var(--navy);">Year-over-Year: Booked Calls &amp; Created Accounts</h3>
+      <div class="legend">
+        <span><span class="dot peak-light"></span>Year peak</span>
+        <span><span class="dot low"></span>Year low</span>
+      </div>
+      <div class="yoy-grid" id="seo-yoy-grid"></div>
+    </div>
+    <div id="seo-standard-view">
+      <div class="kpi-grid" id="seo-kpis"></div>
+      <div class="chart-grid">
+        <div class="chart-card"><h3>Total Users</h3><canvas id="seo-chart-users"></canvas></div>
+        <div class="chart-card"><h3>Sessions</h3><canvas id="seo-chart-sessions"></canvas></div>
+        <div class="chart-card"><h3>Page Views</h3><canvas id="seo-chart-views"></canvas></div>
+        <div class="chart-card"><h3>Booked Calls &amp; Created Accounts</h3><canvas id="seo-chart-conv"></canvas></div>
+      </div>
+      <div class="table-card">
+        <h3 id="seo-table-title">Data Table</h3>
+        <table class="kpi-table">
+          <thead><tr id="seo-table-head"></tr></thead>
+          <tbody id="seo-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="status" id="seo-status"></div>
+  </div>
+</div>
+
+<!-- ==================== NEWSLETTER TAB ==================== -->
+<div id="tab-newsletter" class="tab-content">
+  <div class="section-title">Newsletter Performance</div>
+  <div class="section-sub" id="nl-sub">Beyond Banks edition stats</div>
+
+  <div id="nl-loading" class="loading">Loading newsletter data...</div>
+  <div id="nl-dashboard" style="display:none;">
+    <div class="kpi-grid" id="nl-kpis"></div>
+    <div class="chart-grid">
+      <div class="chart-card full"><h3>Unique Opens (all editions)</h3><canvas id="nl-chart-opens"></canvas></div>
+      <div class="chart-card"><h3>Open Rate % Over Time</h3><canvas id="nl-chart-rate"></canvas></div>
+      <div class="chart-card"><h3>Avg Unique Opens by Topic</h3><canvas id="nl-chart-topic"></canvas></div>
+      <div class="chart-card"><h3>Avg Open Rate % by Topic</h3><canvas id="nl-chart-topic-rate"></canvas></div>
+      <div class="chart-card"><h3>CTR % Over Time</h3><canvas id="nl-chart-ctr"></canvas></div>
+    </div>
+    <div class="table-card">
+      <h3>All Editions (newest first)</h3>
+      <table class="kpi-table">
+        <thead><tr>
+          <th style="text-align:left;">Date</th><th style="text-align:left;">Title</th><th style="text-align:left;">Topic</th>
+          <th>Sent</th><th>Unique Opens</th><th>Open Rate</th><th>Clicks</th><th>CTR</th><th>Web Views</th><th>Unsubs</th>
+        </tr></thead>
+        <tbody id="nl-table-body"></tbody>
+      </table>
+    </div>
+    <div class="status" id="nl-status"></div>
+  </div>
+  <div id="nl-error" class="err" style="display:none;"></div>
+</div>
+
+<!-- ==================== BLOG TAB ==================== -->
+<div id="tab-blog" class="tab-content">
+  <div class="section-title">Blog Performance</div>
+  <div class="section-sub" id="blog-sub">Master Blog Inventory overview</div>
+
+  <div id="blog-loading" class="loading">Loading blog data...</div>
+  <div id="blog-dashboard" style="display:none;">
+    <div class="kpi-grid" id="blog-kpis"></div>
+    <div class="chart-grid">
+      <div class="chart-card"><h3>Published Posts per Month</h3><canvas id="blog-chart-monthly"></canvas></div>
+      <div class="chart-card"><h3>Posts by Status</h3><canvas id="blog-chart-status"></canvas></div>
+    </div>
+    <div class="table-card">
+      <h3>Published Posts (newest first)</h3>
+      <table class="kpi-table">
+        <thead><tr>
+          <th style="text-align:left;">Published</th>
+          <th style="text-align:left;">Title</th>
+          <th>Status</th>
+          <th>Created Via</th>
+        </tr></thead>
+        <tbody id="blog-table-body"></tbody>
+      </table>
+    </div>
+    <div class="status" id="blog-status"></div>
+  </div>
+  <div id="blog-error" class="err" style="display:none;"></div>
+</div>
+
+<script>
+/* ==========================
+   SHARED UTILITIES
+   ========================== */
+const COLORS = {
+  purple: "#6366F1", purpleDeep: "#9F93E2",
+  blue: "#0047AB", lightBlue: "#2563C8", navy: "#0F172A",
+  slate: "#1E293B", amber: "#D97706", green: "#059669", red: "#DC2626",
+};
+const MONTH_COLORS_IDX = [
+  "#dbeafe","#fef3c7","#dcfce7","#fce7f3",
+  "#ede9fe","#ffedd5","#cffafe","#fef9c3",
+  "#f3e8ff","#ffe4e6","#d1fae5","#e0e7ff",
+];
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+let charts = {};
+function num(v) {
+  if (v == null) return 0;
+  const s = String(v).replace(/[,%$]/g, "").trim();
+  if (!s || s.toLowerCase() === "no data") return 0;
+  const n = parseFloat(s); return isNaN(n) ? 0 : n;
+}
+function fmt(n) { return n.toLocaleString("en-US", { maximumFractionDigits: 0 }); }
+function fmtPct(n) { return n.toFixed(1) + "%"; }
+function delta(curr, prev) {
+  if (!prev) return { txt: "\u2014", cls: "flat" };
+  const pct = ((curr - prev) / prev) * 100;
+  const arrow = pct > 0.5 ? "\u25B2" : pct < -0.5 ? "\u25BC" : "\u25A0";
+  const cls = pct > 0.5 ? "up" : pct < -0.5 ? "down" : "flat";
+  return { txt: `${arrow} ${pct.toFixed(1)}% vs prior`, cls };
+}
+function shortDate(d) {
+  if (!d) return "";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "2-digit" });
+}
+function parseDate(s) { if (!s) return null; const d = new Date(s); return isNaN(d) ? null : d; }
+function parseLabelDate(label) {
+  if (!label) return null;
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(label)) {
+    const [m, d, y] = label.split("/").map(Number);
+    return new Date(y, m - 1, d);
+  }
+  const d = new Date(label + " 1");
+  return isNaN(d) ? null : d;
+}
+async function fetchCSV(url) {
+  const res = await fetch(url);
+  const text = await res.text();
+  return Papa.parse(text, { header: false, skipEmptyLines: true }).data;
+}
+function lineChart(id, labels, datasets, yLabel) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id).getContext("2d");
+  charts[id] = new Chart(ctx, {
+    type: "line", data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: datasets.length > 1, position: "bottom", labels: { boxWidth: 12, font: { size: 12 } } },
+        tooltip: { backgroundColor: "#0F172A", padding: 12, cornerRadius: 8 },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 } },
+        y: { grid: { color: "#f1f5f9" }, ticks: { font: { size: 11 }, callback: v => fmt(v) }, beginAtZero: true, title: { display: !!yLabel, text: yLabel } },
+      },
+    },
+  });
+}
+function barChart(id, labels, data, label, color) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id).getContext("2d");
+  charts[id] = new Chart(ctx, {
+    type: "bar", data: { labels, datasets: [{ label, data, backgroundColor: color }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true },
+        x: { ticks: { maxRotation: 45, minRotation: 30, autoSkip: false, font: { size: 10 } } },
+      },
+    },
+  });
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  document.querySelector('[data-tab="' + tabId + '"]').classList.add('active');
+}
+
+
+/* ==========================
+   SEO TAB
+   ========================== */
+const SEO_WEEKLY_CSV  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1gd0zqgK_ykEIPaqrnf_qR85N_cInigombDP83o3w1g0ZgdP-sTVd9OjYN_YD8ZOAE0V6QFk_XgaG/pub?gid=408956551&single=true&output=csv";
+const SEO_MONTHLY_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1gd0zqgK_ykEIPaqrnf_qR85N_cInigombDP83o3w1g0ZgdP-sTVd9OjYN_YD8ZOAE0V6QFk_XgaG/pub?gid=161346380&single=true&output=csv";
+
+let seoWeekly = [], seoMonthly = [], seoView = "weekly";
+const CUTOFF_2025 = new Date(2025, 0, 1);
+
+function parseSeoWeekly(rows) {
+  return rows.slice(1).filter(r => r[0] && r[0].trim()).map(r => ({
+    label: r[0], endDate: r[1],
+    totalUsers: num(r[3]), newUsers: num(r[4]), sessions: num(r[5]),
+    views: num(r[7]), bookedCall: num(r[8]), createdAccount: num(r[9]),
+  }));
+}
+function parseSeoMonthly(rows) {
+  return rows.slice(1).filter(r => r[0] && r[0].trim() && !r[0].toLowerCase().includes("total")).map(r => ({
+    label: r[0], totalUsers: num(r[1]), newUsers: num(r[2]),
+    sessions: num(r[3]), views: num(r[5]), bookedCall: num(r[6]), createdAccount: num(r[7]),
+  }));
+}
+function renderSeoKPIs(data) {
+  const last = data[data.length - 1] || {};
+  const prev = data[data.length - 2] || {};
+  const cards = [
+    { label: "Total Users", key: "totalUsers" },
+    { label: "New Users", key: "newUsers" },
+    { label: "Sessions", key: "sessions" },
+    { label: "Page Views", key: "views" },
+    { label: "Booked Calls", key: "bookedCall" },
+    { label: "Created Accounts", key: "createdAccount" },
+  ];
+  document.getElementById("seo-kpis").innerHTML = cards.map(c => {
+    const d = delta(last[c.key], prev[c.key]);
+    return `<div class="kpi"><div class="label">${c.label}</div><div class="value">${fmt(last[c.key] || 0)}</div><div class="delta ${d.cls}">${d.txt}</div></div>`;
+  }).join("");
+}
+function renderSeo(view) {
+  seoView = view;
+  const all = view === "weekly" ? seoWeekly : seoMonthly;
+  const data = view === "weekly" ? all.slice(-16) : all;
+  if (!data.length) return;
+  renderSeoKPIs(all);
+  const labels = data.map(d => d.label);
+  const ds = (label, key, color) => ({
+    label, data: data.map(d => d[key]),
+    borderColor: color, backgroundColor: color + "22",
+    borderWidth: 2.5, tension: 0.35, fill: true, pointRadius: 2, pointHoverRadius: 5,
+  });
+  lineChart("seo-chart-users", labels, [ds("Total Users", "totalUsers", COLORS.purple), ds("New Users", "newUsers", COLORS.slate)]);
+  lineChart("seo-chart-sessions", labels, [ds("Sessions", "sessions", COLORS.lightBlue)]);
+  lineChart("seo-chart-views", labels, [ds("Page Views", "views", COLORS.navy)]);
+  lineChart("seo-chart-conv", labels, [ds("Booked Calls", "bookedCall", COLORS.purple), ds("Created Accounts", "createdAccount", COLORS.amber)]);
+  renderSeoTable(view, all);
+  document.getElementById("seo-status").textContent = `Showing ${view === "weekly" ? "last " + data.length + " weeks" : data.length + " months"} \u00B7 Refreshed ${new Date().toLocaleString()}`;
+}
+function renderSeoTable(view, all) {
+  const rows = all.filter(d => { const dt = parseLabelDate(d.label); return dt && dt >= CUTOFF_2025; });
+  const pl = view === "weekly" ? "Week Starting" : "Month";
+  document.getElementById("seo-table-title").textContent = `Data Table \u00B7 Jan 2025 \u2013 Present (${view === "weekly" ? "Weekly" : "Monthly"})`;
+  document.getElementById("seo-table-head").innerHTML = `<th>${pl}</th><th>Total Users</th><th>New Users</th><th>Sessions</th><th>Page Views</th><th>Booked Calls</th><th>Created Accounts</th>`;
+  document.getElementById("seo-table-body").innerHTML = rows.slice().reverse().map(r => {
+    const dt = parseLabelDate(r.label);
+    const bg = dt ? MONTH_COLORS_IDX[dt.getMonth()] : "transparent";
+    return `<tr style="background:${bg};"><td>${r.label}</td><td>${fmt(r.totalUsers)}</td><td>${fmt(r.newUsers)}</td><td>${fmt(r.sessions)}</td><td>${fmt(r.views)}</td><td>${fmt(r.bookedCall)}</td><td>${fmt(r.createdAccount)}</td></tr>`;
+  }).join("");
+}
+function renderSeoWeekGrid(metric) {
+  const grid = {};
+  seoWeekly.forEach(r => {
+    const d = parseLabelDate(r.label); if (!d) return;
+    const y = d.getFullYear(), m = d.getMonth(), w = Math.min(4, Math.floor((d.getDate()-1)/7));
+    grid[y] = grid[y]||{}; grid[y][m] = grid[y][m]||{}; grid[y][m][w] = (grid[y][m][w]||0) + r[metric];
+  });
+  const years = Object.keys(grid).map(Number).sort();
+  const currentYear = new Date().getFullYear();
+  const isBooked = metric === "bookedCall";
+  const title = isBooked ? "Booked Calls" : "Created Accounts";
+  const cellClass = isBooked ? "booked-cell" : "acct-cell";
+  document.getElementById("seo-weekgrid-title").textContent = `Week-of-Month Performance \u00B7 ${title}`;
+  document.getElementById("seo-weekgrid-head").innerHTML = `<tr><th>Month</th><th>Year</th>${[1,2,3,4,5].map(n=>`<th>Week ${n}</th>`).join("")}<th class="total-col">Month Total</th></tr>`;
+  const yearTopMonth = {};
+  years.forEach(y => {
+    let best = { val: -Infinity, mi: -1 };
+    MONTH_NAMES.forEach((_,mi) => { let t=0; for(let w=0;w<5;w++) t+=(grid[y]?.[mi]?.[w]||0); if(t>best.val)best={val:t,mi}; });
+    if(best.val>0) yearTopMonth[y]=best.mi;
+  });
+  const peakCounts=[0,0,0,0,0], rowsHtml=[];
+  MONTH_NAMES.forEach((name,mi)=>{
+    years.forEach((y,yi)=>{
+      const rowCls=y===currentYear?"current":"";
+      const monthCell=yi===0?`<td class="month-label" rowspan="${years.length}" style="background:${MONTH_COLORS_IDX[mi]};">${name}</td>`:"";
+      const weekVals=[0,1,2,3,4].map(w=>grid[y]?.[mi]?.[w]);
+      let total=0,peakW=-1,peakVal=-Infinity;
+      weekVals.forEach((v,w)=>{if(v!=null){total+=v;if(v>peakVal){peakVal=v;peakW=w;}}});
+      const hasData=weekVals.some(v=>v!=null&&v>0);
+      if(hasData)peakCounts[peakW]++;
+      const weekCells=weekVals.map((v,w)=>{
+        if(v==null)return`<td>\u2014</td>`;
+        const pctStr=total>0?`<span class="pct-sm">${((v/total)*100).toFixed(0)}%</span>`:"";
+        const isPeak=hasData&&w===peakW;
+        const tdCls=`${cellClass}${isPeak?" peak":""}`;
+        const inner=isPeak?`<span class="peak-num">${fmt(v)}</span>`:fmt(v);
+        return`<td class="${tdCls}">${inner}${pctStr}</td>`;
+      }).join("");
+      const isYTM=yearTopMonth[y]===mi&&total>0;
+      const totalCell=`<td class="total-cell${isYTM?" peak-year":""}">${isYTM?`<span class="peak-num">${fmt(total)}</span>`:fmt(total)}</td>`;
+      rowsHtml.push(`<tr class="${rowCls}">${monthCell}<td class="year-label">${y}</td>${weekCells}${totalCell}</tr>`);
+    });
+  });
+  document.getElementById("seo-weekgrid-body").innerHTML = `<tr class="peak-summary"><td class="label" colspan="2">Peak Weeks \u2192</td>${peakCounts.map(c=>`<td>${c}</td>`).join("")}<td></td></tr>` + rowsHtml.join("");
+}
+function renderSeoYoY() {
+  const grid={}; MONTH_NAMES.forEach((_,i)=>grid[i]={});
+  seoMonthly.forEach(r=>{const m=r.label.match(/^(\w+)\s+(\d{4})$/);if(!m)return;const idx=MONTH_NAMES.indexOf(m[1].slice(0,3));if(idx<0)return;grid[idx][m[2]]={bookedCall:r.bookedCall,createdAccount:r.createdAccount};});
+  const currentYear=String(new Date().getFullYear());
+  const years=[...new Set(seoMonthly.map(r=>{const m=r.label.match(/^(\w+)\s+(\d{4})$/);return m?m[2]:null;}).filter(Boolean))].sort();
+  const peakB={},peakA={},lowB={},lowA={};
+  years.forEach(y=>{let bB={val:-Infinity,m:-1},bA={val:-Infinity,m:-1},wB={val:Infinity,m:-1},wA={val:Infinity,m:-1},cB=0,cA=0;
+    MONTH_NAMES.forEach((_,i)=>{const d=grid[i][y];if(!d)return;if(d.bookedCall>0){cB++;if(d.bookedCall>bB.val)bB={val:d.bookedCall,m:i};if(d.bookedCall<wB.val)wB={val:d.bookedCall,m:i};}if(d.createdAccount>0){cA++;if(d.createdAccount>bA.val)bA={val:d.createdAccount,m:i};if(d.createdAccount<wA.val)wA={val:d.createdAccount,m:i};}});
+    if(cB>0)peakB[y]=bB.m;if(cA>0)peakA[y]=bA.m;if(cB>1&&wB.m!==bB.m)lowB[y]=wB.m;if(cA>1&&wA.m!==bA.m)lowA[y]=wA.m;});
+  function pctBadge(curr,prev){if(!prev)return"";const pct=((curr-prev)/prev)*100;const cls=pct>0.5?"up":pct<-0.5?"down":"flat";const arrow=pct>0.5?"\u25B2":pct<-0.5?"\u25BC":"\u25A0";return`<span class="pct ${cls}">${arrow} ${pct.toFixed(0)}% YoY</span>`;}
+  document.getElementById("seo-yoy-grid").innerHTML=MONTH_NAMES.map((name,i)=>{
+    const rows=years.map((y,yi)=>{const d=grid[i][y];const prev=yi>0?grid[i][years[yi-1]]:null;const cls=y===currentYear?"current":"";
+      if(!d)return`<tr class="${cls}"><td>${y}</td><td>\u2014</td><td>\u2014</td></tr>`;
+      const wrap=(c,isP,isL)=>{if(isP)return`<span class="global-peak">${c}</span>`;if(isL)return`<span class="global-low">${c}</span>`;return c;};
+      const bN=wrap(fmt(d.bookedCall),peakB[y]===i,lowB[y]===i);const aN=wrap(fmt(d.createdAccount),peakA[y]===i,lowA[y]===i);
+      const bP=prev&&prev.bookedCall?pctBadge(d.bookedCall,prev.bookedCall):"";const aP=prev&&prev.createdAccount?pctBadge(d.createdAccount,prev.createdAccount):"";
+      return`<tr class="${cls}"><td>${y}</td><td>${bN}${bP}</td><td>${aN}${aP}</td></tr>`;}).join("");
+    return`<div class="month-card" style="border-top:4px solid ${MONTH_COLORS_IDX[i]};"><h4>${name}</h4><table><thead><tr><th>Year</th><th>Booked</th><th>Accounts</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }).join("");
+}
+function setSeoView(view) {
+  ["weekly","monthly","yoy","wg-booked","wg-accounts"].forEach(v=>{
+    const el=document.getElementById("btn-"+v.replace("wg-","wg-"));
+    if(el) el.classList.toggle("active",v===view);
+  });
+  const std=document.getElementById("seo-standard-view"),yoy=document.getElementById("seo-yoy-view"),wg=document.getElementById("seo-weekgrid-view");
+  std.style.display="none";yoy.style.display="none";wg.style.display="none";
+  if(view==="yoy"){yoy.style.display="block";renderSeoYoY();}
+  else if(view==="wg-booked"){wg.style.display="block";renderSeoWeekGrid("bookedCall");}
+  else if(view==="wg-accounts"){wg.style.display="block";renderSeoWeekGrid("createdAccount");}
+  else{std.style.display="block";renderSeo(view);}
+}
+async function initSeo() {
+  try {
+    const [w,m] = await Promise.all([fetchCSV(SEO_WEEKLY_CSV), fetchCSV(SEO_MONTHLY_CSV)]);
+    seoWeekly = parseSeoWeekly(w); seoMonthly = parseSeoMonthly(m);
+    if(seoWeekly.length){const last=parseLabelDate(seoWeekly[seoWeekly.length-1].label);if(last)document.getElementById("seo-sub").textContent=`Latest: ${last.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}`;}
+    document.getElementById("seo-loading").style.display="none";
+    document.getElementById("seo-dashboard").style.display="block";
+    renderSeo("weekly");
+  } catch(e) { document.getElementById("seo-loading").textContent="Failed: "+e.message; }
+}
+
+
+/* ==========================
+   NEWSLETTER TAB
+   ========================== */
+const NL_SHEET_ID = "1OuHl5KvZvLTfulmzCHdUWUookpePigQGAw1hqy4CbUs";
+const NL_GID = "1583640106";
+const NL_CSV = `https://docs.google.com/spreadsheets/d/${NL_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${NL_GID}`;
+
+let nlEditions = [];
+
+async function initNewsletter() {
+  try {
+    const res = await fetch(NL_CSV);
+    if (!res.ok) throw new Error(`Sheet fetch failed (${res.status})`);
+    const text = await res.text();
+    const rows = Papa.parse(text, { header: false, skipEmptyLines: true }).data;
+    nlEditions = rows.slice(1)
+      .filter(r => r[0] && r[0].trim() && r[13])
+      .map(r => ({
+        dateRaw: r[0], date: parseDate(r[0]), title: r[1]||"", topic: r[3]||"Uncategorized",
+        url: r[6]||"", sent: num(r[7]), openRate: num(r[8]), clicks: num(r[9]),
+        ctr: num(r[10]), webViews: num(r[11]), unsubs: num(r[12]), uniqueOpens: num(r[13]),
+      }))
+      .filter(e => e.date)
+      .sort((a,b) => a.date - b.date);
+    if (!nlEditions.length) throw new Error("No editions parsed.");
+    document.getElementById("nl-loading").style.display="none";
+    document.getElementById("nl-dashboard").style.display="block";
+    renderNlKPIs(); renderNlCharts(); renderNlTable();
+    const latest = nlEditions[nlEditions.length-1];
+    document.getElementById("nl-sub").textContent = `Latest: ${latest.date.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})} \u00B7 ${nlEditions.length} editions`;
+    document.getElementById("nl-status").textContent = `Refreshed ${new Date().toLocaleString()} \u00B7 ${nlEditions.length} editions`;
+  } catch(e) {
+    document.getElementById("nl-loading").style.display="none";
+    const err=document.getElementById("nl-error");err.style.display="block";
+    err.innerHTML=`<strong>Couldn't load newsletter data.</strong><br>${e.message}`;
+  }
+}
+function renderNlKPIs() {
+  const last=nlEditions[nlEditions.length-1],prev=nlEditions[nlEditions.length-2]||{};
+  const avgO=nlEditions.reduce((s,e)=>s+e.uniqueOpens,0)/nlEditions.length;
+  const avgR=nlEditions.reduce((s,e)=>s+e.openRate,0)/nlEditions.length;
+  const peak=nlEditions.reduce((p,e)=>e.uniqueOpens>p.uniqueOpens?e:p,nlEditions[0]);
+  const last5=nlEditions.slice(-5).reduce((s,e)=>s+e.uniqueOpens,0)/Math.min(5,nlEditions.length);
+  const d1=delta(last.uniqueOpens,prev.uniqueOpens),d2=delta(last.openRate,prev.openRate);
+  document.getElementById("nl-kpis").innerHTML=[
+    {label:"Latest Unique Opens",value:fmt(last.uniqueOpens),delta:d1},
+    {label:"Latest Open Rate",value:fmtPct(last.openRate),delta:d2},
+    {label:"Avg Unique Opens",value:fmt(avgO),delta:{txt:`last 5: ${fmt(last5)}`,cls:"flat"}},
+    {label:"Avg Open Rate",value:fmtPct(avgR),delta:{txt:`${nlEditions.length} editions`,cls:"flat"}},
+    {label:"Peak Edition",value:fmt(peak.uniqueOpens),delta:{txt:shortDate(peak.date),cls:"flat"}},
+  ].map(c=>`<div class="kpi"><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="delta ${c.delta.cls}">${c.delta.txt}</div></div>`).join("");
+}
+function renderNlCharts() {
+  const labels=nlEditions.map(e=>shortDate(e.date));
+  lineChart("nl-chart-opens",labels,[{label:"Unique Opens",data:nlEditions.map(e=>e.uniqueOpens),borderColor:COLORS.purple,backgroundColor:"rgba(99,102,241,0.12)",fill:true,tension:0.3,pointRadius:3,borderWidth:2}],"Unique Opens");
+  lineChart("nl-chart-rate",labels,[{label:"Open Rate %",data:nlEditions.map(e=>e.openRate),borderColor:COLORS.green,backgroundColor:"rgba(5,150,105,0.10)",fill:true,tension:0.3,pointRadius:2,borderWidth:2}],"%");
+  lineChart("nl-chart-ctr",labels,[{label:"CTR %",data:nlEditions.map(e=>e.ctr),borderColor:COLORS.amber,backgroundColor:"rgba(217,119,6,0.10)",fill:true,tension:0.3,pointRadius:2,borderWidth:2}],"%");
+  const topicMap={};
+  nlEditions.forEach(e=>{if(!topicMap[e.topic])topicMap[e.topic]={sumO:0,sumR:0,n:0};topicMap[e.topic].sumO+=e.uniqueOpens;topicMap[e.topic].sumR+=e.openRate;topicMap[e.topic].n+=1;});
+  const topics=Object.entries(topicMap).map(([t,v])=>({topic:t,avgO:v.sumO/v.n,avgR:v.sumR/v.n,n:v.n})).sort((a,b)=>b.avgO-a.avgO);
+  barChart("nl-chart-topic",topics.map(t=>`${t.topic} (${t.n})`),topics.map(t=>Math.round(t.avgO)),"Avg Unique Opens",COLORS.purple);
+  const byRate=[...topics].sort((a,b)=>b.avgR-a.avgR);
+  barChart("nl-chart-topic-rate",byRate.map(t=>`${t.topic} (${t.n})`),byRate.map(t=>+t.avgR.toFixed(1)),"Avg Open Rate %",COLORS.green);
+}
+function renderNlTable() {
+  const peak=nlEditions.reduce((p,e)=>e.uniqueOpens>p.uniqueOpens?e:p,nlEditions[0]);
+  document.getElementById("nl-table-body").innerHTML=[...nlEditions].reverse().map(e=>{
+    const peakCls=e===peak?"peak-row":"";
+    const titleCell=e.url?`<a href="${e.url}" target="_blank" rel="noopener">${e.title}</a>`:e.title;
+    return`<tr class="${peakCls}"><td>${shortDate(e.date)}</td><td>${titleCell}</td><td><span class="pill pill-purple">${e.topic}</span></td><td>${fmt(e.sent)}</td><td><strong>${fmt(e.uniqueOpens)}</strong></td><td>${fmtPct(e.openRate)}</td><td>${fmt(e.clicks)}</td><td>${fmtPct(e.ctr)}</td><td>${fmt(e.webViews)}</td><td>${fmt(e.unsubs)}</td></tr>`;
+  }).join("");
+}
+
+
+/* ==========================
+   BLOG TAB
+   ========================== */
+const BLOG_SHEET_ID = "1cqY_GO7UvFN_x5RfiO5XuB1Pj-UPbWvzTp9W_4o51LY";
+const BLOG_GID = "0";
+const BLOG_CSV = `https://docs.google.com/spreadsheets/d/${BLOG_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${BLOG_GID}`;
+
+let blogPosts = [];
+
+async function initBlog() {
+  try {
+    const res = await fetch(BLOG_CSV);
+    if (!res.ok) throw new Error(`Blog sheet fetch failed (${res.status})`);
+    const text = await res.text();
+    const rows = Papa.parse(text, { header: false, skipEmptyLines: true }).data;
+    // Cols: A=item_id B=title C=slug D=published_date E=last_updated F=status G=blog_url H=image_status I=image_url J=webflow_status K=date_added L=created_via
+    blogPosts = rows.slice(1).filter(r => r[1] && r[1].trim()).map(r => ({
+      title: r[1]||"", slug: r[2]||"", publishedDate: parseDate(r[3]),
+      status: (r[5]||"").trim(), blogUrl: r[6]||"",
+      imageStatus: r[7]||"", dateAdded: parseDate(r[10]),
+      createdVia: r[11]||"",
+    }));
+    if (!blogPosts.length) throw new Error("No blog posts parsed.");
+    document.getElementById("blog-loading").style.display="none";
+    document.getElementById("blog-dashboard").style.display="block";
+    renderBlogKPIs(); renderBlogCharts(); renderBlogTable();
+    document.getElementById("blog-status").textContent = `Refreshed ${new Date().toLocaleString()} \u00B7 ${blogPosts.length} total posts`;
+  } catch(e) {
+    document.getElementById("blog-loading").style.display="none";
+    const err=document.getElementById("blog-error");err.style.display="block";
+    err.innerHTML=`<strong>Couldn't load blog data.</strong><br>${e.message}<br><br>Make sure the sheet is shared "Anyone with the link".`;
+  }
+}
+function renderBlogKPIs() {
+  const published = blogPosts.filter(p => p.status.toLowerCase() === "published");
+  const drafts = blogPosts.filter(p => p.status.toLowerCase() === "draft");
+  const ideas = blogPosts.filter(p => p.status.toLowerCase() === "idea");
+  const withImages = published.filter(p => p.imageStatus && p.imageStatus.toLowerCase() !== "pending" && p.imageStatus.toLowerCase() !== "");
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getFullYear(), now.getMonth()-1, now.getDate());
+  const recentPub = published.filter(p => p.publishedDate && p.publishedDate >= thirtyDaysAgo);
+  document.getElementById("blog-kpis").innerHTML = [
+    { label: "Published Posts", value: fmt(published.length), delta: { txt: `${fmt(recentPub.length)} in last 30 days`, cls: "flat" } },
+    { label: "Drafts", value: fmt(drafts.length), delta: { txt: "in progress", cls: "flat" } },
+    { label: "Ideas in Pipeline", value: fmt(ideas.length), delta: { txt: "queued", cls: "flat" } },
+    { label: "Total Posts", value: fmt(blogPosts.length), delta: { txt: `${fmt(withImages.length)} with images`, cls: "flat" } },
+  ].map(c => `<div class="kpi"><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="delta ${c.delta.cls}">${c.delta.txt}</div></div>`).join("");
+}
+function renderBlogCharts() {
+  const published = blogPosts.filter(p => p.status.toLowerCase() === "published" && p.publishedDate);
+  // Posts per month
+  const monthMap = {};
+  published.forEach(p => {
+    const key = `${MONTH_NAMES[p.publishedDate.getMonth()]} ${p.publishedDate.getFullYear()}`;
+    monthMap[key] = (monthMap[key]||0) + 1;
+  });
+  const sortedMonths = Object.entries(monthMap).sort((a,b) => {
+    const da = new Date(a[0]+" 1"), db = new Date(b[0]+" 1");
+    return da - db;
+  });
+  barChart("blog-chart-monthly", sortedMonths.map(m=>m[0]), sortedMonths.map(m=>m[1]), "Published Posts", COLORS.purple);
+
+  // Status breakdown
+  const statusMap = {};
+  blogPosts.forEach(p => { const s = p.status || "Unknown"; statusMap[s] = (statusMap[s]||0)+1; });
+  const statuses = Object.entries(statusMap).sort((a,b) => b[1]-a[1]);
+  const statusColors = statuses.map(([s]) => {
+    const sl = s.toLowerCase();
+    if (sl === "published") return COLORS.green;
+    if (sl === "draft") return COLORS.amber;
+    if (sl === "idea") return COLORS.purple;
+    if (sl === "review") return COLORS.lightBlue;
+    return "#94a3b8";
+  });
+  if (charts["blog-chart-status"]) charts["blog-chart-status"].destroy();
+  const ctx = document.getElementById("blog-chart-status").getContext("2d");
+  charts["blog-chart-status"] = new Chart(ctx, {
+    type: "doughnut",
+    data: { labels: statuses.map(s=>s[0]), datasets: [{ data: statuses.map(s=>s[1]), backgroundColor: statusColors }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } },
+  });
+}
+function renderBlogTable() {
+  const published = blogPosts.filter(p => p.status.toLowerCase() === "published" && p.publishedDate)
+    .sort((a,b) => b.publishedDate - a.publishedDate);
+  document.getElementById("blog-table-body").innerHTML = published.map(p => {
+    const titleCell = p.blogUrl ? `<a href="${p.blogUrl}" target="_blank" rel="noopener">${p.title}</a>` : p.title;
+    const statusPill = `<span class="pill pill-green">Published</span>`;
+    return `<tr><td>${shortDate(p.publishedDate)}</td><td style="text-align:left;white-space:normal;max-width:400px;">${titleCell}</td><td>${statusPill}</td><td><span class="pill pill-gray">${p.createdVia||"\u2014"}</span></td></tr>`;
+  }).join("");
+  document.getElementById("blog-sub").textContent = `${published.length} published posts tracked`;
+}
+
+
+/* ==========================
+   INIT ALL TABS
+   ========================== */
+initSeo();
+initNewsletter();
+initBlog();
+</script>
+</body>
+</html>
