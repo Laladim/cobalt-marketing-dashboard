@@ -306,6 +306,87 @@ table.week-grid tr.peak-summary td.label {
 table.kpi-table th:nth-child(2), table.kpi-table td:nth-child(2) { text-align: left; }
 table.kpi-table td:nth-child(2) { white-space: normal; max-width: 360px; }
 
+/* Onboarding tab */
+.onboarding-hero {
+  background: linear-gradient(135deg, rgba(159,147,226,0.12), rgba(99,102,241,0.10));
+  border: 1px solid rgba(99,102,241,0.22);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.onboarding-lead {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--navy);
+  max-width: 760px;
+  margin: 0;
+}
+.onboarding-cta {
+  background: linear-gradient(135deg, var(--purple-deep), var(--purple));
+  color: #ffffff;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(99,102,241,0.25);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.onboarding-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(99,102,241,0.35); }
+.onboarding-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+.onboarding-card {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+}
+.onboarding-card:hover {
+  border-color: var(--purple);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(99,102,241,0.12);
+}
+.onboarding-num {
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--purple);
+  letter-spacing: 0.12em;
+  margin-bottom: 10px;
+}
+.onboarding-card h3 {
+  font-family: 'Sora', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 8px;
+}
+.onboarding-card p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+}
+.onboarding-card .arrow {
+  color: var(--purple);
+  font-weight: 600;
+  font-size: 13px;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .tab-btn { padding: 10px 8px; font-size: 12px; }
@@ -313,6 +394,7 @@ table.kpi-table td:nth-child(2) { white-space: normal; max-width: 360px; }
   .tab-content { padding: 20px 16px 40px; }
   .chart-grid { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .onboarding-hero { padding: 22px; }
 }
 </style>
 </head>
@@ -320,13 +402,13 @@ table.kpi-table td:nth-child(2) { white-space: normal; max-width: 360px; }
 
 <div class="site-header">
   <div class="brand-title">Cobalt Intelligence Marketing Dashboard</div>
-  <div class="brand-sub">SEO, Newsletter &amp; Blog Performance</div>
+  <div class="brand-sub">SEO, Newsletter &amp; Onboarding</div>
 </div>
 
 <nav class="tab-bar">
   <button class="tab-btn active" data-tab="seo" onclick="switchTab('seo')">SEO</button>
   <button class="tab-btn" data-tab="newsletter" onclick="switchTab('newsletter')">Newsletter</button>
-  <button class="tab-btn" data-tab="blog" onclick="switchTab('blog')">Blog</button>
+  <button class="tab-btn" data-tab="onboarding" onclick="switchTab('onboarding')">Onboarding</button>
 </nav>
 
 <!-- ==================== SEO TAB ==================== -->
@@ -415,33 +497,60 @@ table.kpi-table td:nth-child(2) { white-space: normal; max-width: 360px; }
   <div id="nl-error" class="err" style="display:none;"></div>
 </div>
 
-<!-- ==================== BLOG TAB ==================== -->
-<div id="tab-blog" class="tab-content">
-  <div class="section-title">Blog Performance</div>
-  <div class="section-sub" id="blog-sub">Master Blog Inventory overview</div>
+<!-- ==================== ONBOARDING TAB ==================== -->
+<div id="tab-onboarding" class="tab-content">
+  <div class="section-title">Marketing Onboarding</div>
+  <div class="section-sub">New hire primer &middot; Who we are, what we sell, how we sound, where we show up</div>
 
-  <div id="blog-loading" class="loading">Loading blog data...</div>
-  <div id="blog-dashboard" style="display:none;">
-    <div class="kpi-grid" id="blog-kpis"></div>
-    <div class="chart-grid">
-      <div class="chart-card"><h3>Published Posts per Month</h3><canvas id="blog-chart-monthly"></canvas></div>
-      <div class="chart-card"><h3>Posts by Status</h3><canvas id="blog-chart-status"></canvas></div>
-    </div>
-    <div class="table-card">
-      <h3>Published Posts (newest first)</h3>
-      <table class="kpi-table">
-        <thead><tr>
-          <th style="text-align:left;">Published</th>
-          <th style="text-align:left;">Title</th>
-          <th>Status</th>
-          <th>Created Via</th>
-        </tr></thead>
-        <tbody id="blog-table-body"></tbody>
-      </table>
-    </div>
-    <div class="status" id="blog-status"></div>
+  <div class="onboarding-hero">
+    <p class="onboarding-lead">Cobalt Intelligence is a B2B data API that pulls real-time business records directly from all 50 US Secretary of State databases, so alternative lenders and fintech platforms can verify, underwrite, and onboard businesses in seconds instead of hours.</p>
+    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/" target="_blank" rel="noopener" class="onboarding-cta">Open full onboarding &rarr;</a>
   </div>
-  <div id="blog-error" class="err" style="display:none;"></div>
+
+  <div class="onboarding-grid">
+    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/index.html" target="_blank" rel="noopener" class="onboarding-card">
+      <div class="onboarding-num">01</div>
+      <h3>Welcome</h3>
+      <p>What Cobalt does in one sentence, plus how to use this primer.</p>
+      <span class="arrow">Read &rarr;</span>
+    </a>
+    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/company.html" target="_blank" rel="noopener" class="onboarding-card">
+      <div class="onboarding-num">02</div>
+      <h3>Company</h3>
+      <p>Who we are, who we serve, and how we position against competitors.</p>
+      <span class="arrow">Read &rarr;</span>
+    </a>
+    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/team.html" target="_blank" rel="noopener" class="onboarding-card">
+      <div class="onboarding-num">03</div>
+      <h3>Team</h3>
+      <p>The people behind Cobalt and how the marketing function fits in.</p>
+      <span class="arrow">Read &rarr;</span>
+    </a>
+    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/product.html" target="_blank" rel="noopener" class="onboarding-card">
+      <div class="onboarding-num">04</div>
+      <h3>Product</h3>
+      <p>The API suite, the data we deliver, and why customers pick us.</p>
+      <span class="arrow">Read &rarr;</span>
+    </a>
+    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/brand.html" target="_blank" rel="noopener" class="onboarding-card">
+      <div class="onboarding-num">05</div>
+      <h3>Brand</h3>
+      <p>Voice, tone, colors, and typography. What &ldquo;sounds like Cobalt.&rdquo;</p>
+      <span class="arrow">Read &rarr;</span>
+    </a>
+    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/channels.html" target="_blank" rel="noopener" class="onboarding-card">
+      <div class="onboarding-num">06</div>
+      <h3>Channels</h3>
+      <p>Where we publish: website, blog, newsletter, LinkedIn, YouTube.</p>
+      <span class="arrow">Read &rarr;</span>
+    </a>
+    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/resources.html" target="_blank" rel="noopener" class="onboarding-card">
+      <div class="onboarding-num">07</div>
+      <h3>Resources</h3>
+      <p>Bookmarks, links, and quick references to keep handy.</p>
+      <span class="arrow">Read &rarr;</span>
+    </a>
+  </div>
 </div>
 
 <script>
@@ -770,105 +879,10 @@ function renderNlTable() {
 
 
 /* ==========================
-   BLOG TAB
-   ========================== */
-const BLOG_SHEET_ID = "1cqY_GO7UvFN_x5RfiO5XuB1Pj-UPbWvzTp9W_4o51LY";
-const BLOG_GID = "0";
-const BLOG_CSV = `https://docs.google.com/spreadsheets/d/${BLOG_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${BLOG_GID}`;
-
-let blogPosts = [];
-
-async function initBlog() {
-  try {
-    const res = await fetch(BLOG_CSV);
-    if (!res.ok) throw new Error(`Blog sheet fetch failed (${res.status})`);
-    const text = await res.text();
-    const rows = Papa.parse(text, { header: false, skipEmptyLines: true }).data;
-    // Cols: A=item_id B=title C=slug D=published_date E=last_updated F=status G=blog_url H=image_status I=image_url J=webflow_status K=date_added L=created_via
-    blogPosts = rows.slice(1).filter(r => r[1] && r[1].trim()).map(r => ({
-      title: r[1]||"", slug: r[2]||"", publishedDate: parseDate(r[3]),
-      status: (r[5]||"").trim(), blogUrl: r[6]||"",
-      imageStatus: r[7]||"", dateAdded: parseDate(r[10]),
-      createdVia: r[11]||"",
-    }));
-    if (!blogPosts.length) throw new Error("No blog posts parsed.");
-    document.getElementById("blog-loading").style.display="none";
-    document.getElementById("blog-dashboard").style.display="block";
-    renderBlogKPIs(); renderBlogCharts(); renderBlogTable();
-    document.getElementById("blog-status").textContent = `Refreshed ${new Date().toLocaleString()} \u00B7 ${blogPosts.length} total posts`;
-  } catch(e) {
-    document.getElementById("blog-loading").style.display="none";
-    const err=document.getElementById("blog-error");err.style.display="block";
-    err.innerHTML=`<strong>Couldn't load blog data.</strong><br>${e.message}<br><br>Make sure the sheet is shared "Anyone with the link".`;
-  }
-}
-function renderBlogKPIs() {
-  const published = blogPosts.filter(p => p.status.toLowerCase() === "published");
-  const drafts = blogPosts.filter(p => p.status.toLowerCase() === "draft");
-  const ideas = blogPosts.filter(p => p.status.toLowerCase() === "idea");
-  const withImages = published.filter(p => p.imageStatus && p.imageStatus.toLowerCase() !== "pending" && p.imageStatus.toLowerCase() !== "");
-  const now = new Date();
-  const thirtyDaysAgo = new Date(now.getFullYear(), now.getMonth()-1, now.getDate());
-  const recentPub = published.filter(p => p.publishedDate && p.publishedDate >= thirtyDaysAgo);
-  document.getElementById("blog-kpis").innerHTML = [
-    { label: "Published Posts", value: fmt(published.length), delta: { txt: `${fmt(recentPub.length)} in last 30 days`, cls: "flat" } },
-    { label: "Drafts", value: fmt(drafts.length), delta: { txt: "in progress", cls: "flat" } },
-    { label: "Ideas in Pipeline", value: fmt(ideas.length), delta: { txt: "queued", cls: "flat" } },
-    { label: "Total Posts", value: fmt(blogPosts.length), delta: { txt: `${fmt(withImages.length)} with images`, cls: "flat" } },
-  ].map(c => `<div class="kpi"><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="delta ${c.delta.cls}">${c.delta.txt}</div></div>`).join("");
-}
-function renderBlogCharts() {
-  const published = blogPosts.filter(p => p.status.toLowerCase() === "published" && p.publishedDate);
-  // Posts per month
-  const monthMap = {};
-  published.forEach(p => {
-    const key = `${MONTH_NAMES[p.publishedDate.getMonth()]} ${p.publishedDate.getFullYear()}`;
-    monthMap[key] = (monthMap[key]||0) + 1;
-  });
-  const sortedMonths = Object.entries(monthMap).sort((a,b) => {
-    const da = new Date(a[0]+" 1"), db = new Date(b[0]+" 1");
-    return da - db;
-  });
-  barChart("blog-chart-monthly", sortedMonths.map(m=>m[0]), sortedMonths.map(m=>m[1]), "Published Posts", COLORS.purple);
-
-  // Status breakdown
-  const statusMap = {};
-  blogPosts.forEach(p => { const s = p.status || "Unknown"; statusMap[s] = (statusMap[s]||0)+1; });
-  const statuses = Object.entries(statusMap).sort((a,b) => b[1]-a[1]);
-  const statusColors = statuses.map(([s]) => {
-    const sl = s.toLowerCase();
-    if (sl === "published") return COLORS.green;
-    if (sl === "draft") return COLORS.amber;
-    if (sl === "idea") return COLORS.purple;
-    if (sl === "review") return COLORS.lightBlue;
-    return "#94a3b8";
-  });
-  if (charts["blog-chart-status"]) charts["blog-chart-status"].destroy();
-  const ctx = document.getElementById("blog-chart-status").getContext("2d");
-  charts["blog-chart-status"] = new Chart(ctx, {
-    type: "doughnut",
-    data: { labels: statuses.map(s=>s[0]), datasets: [{ data: statuses.map(s=>s[1]), backgroundColor: statusColors }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } },
-  });
-}
-function renderBlogTable() {
-  const published = blogPosts.filter(p => p.status.toLowerCase() === "published" && p.publishedDate)
-    .sort((a,b) => b.publishedDate - a.publishedDate);
-  document.getElementById("blog-table-body").innerHTML = published.map(p => {
-    const titleCell = p.blogUrl ? `<a href="${p.blogUrl}" target="_blank" rel="noopener">${p.title}</a>` : p.title;
-    const statusPill = `<span class="pill pill-green">Published</span>`;
-    return `<tr><td>${shortDate(p.publishedDate)}</td><td style="text-align:left;white-space:normal;max-width:400px;">${titleCell}</td><td>${statusPill}</td><td><span class="pill pill-gray">${p.createdVia||"\u2014"}</span></td></tr>`;
-  }).join("");
-  document.getElementById("blog-sub").textContent = `${published.length} published posts tracked`;
-}
-
-
-/* ==========================
    INIT ALL TABS
    ========================== */
 initSeo();
 initNewsletter();
-initBlog();
 </script>
 </body>
 </html>
