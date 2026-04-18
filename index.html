@@ -386,6 +386,53 @@ table.kpi-table td:nth-child(2) { white-space: normal; max-width: 360px; }
   font-weight: 600;
   font-size: 13px;
 }
+.onboarding-viewer-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+}
+.onboarding-back {
+  background: rgba(99,102,241,0.1);
+  color: var(--purple);
+  border: 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.onboarding-back:hover { background: rgba(99,102,241,0.18); }
+.onboarding-viewer-title {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 15px;
+  flex: 1;
+}
+.onboarding-viewer-external {
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-decoration: none;
+  font-weight: 500;
+}
+.onboarding-viewer-external:hover { color: var(--purple); }
+#onboarding-iframe {
+  width: 100%;
+  height: calc(100vh - 200px);
+  min-height: 600px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-light);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+}
 
 /* Responsive */
 @media (max-width: 600px) {
@@ -499,57 +546,68 @@ table.kpi-table td:nth-child(2) { white-space: normal; max-width: 360px; }
 
 <!-- ==================== ONBOARDING TAB ==================== -->
 <div id="tab-onboarding" class="tab-content">
-  <div class="section-title">Marketing Onboarding</div>
-  <div class="section-sub">New hire primer &middot; Who we are, what we sell, how we sound, where we show up</div>
+  <div id="onboarding-overview">
+    <div class="section-title">Marketing Onboarding</div>
+    <div class="section-sub">New hire primer &middot; Who we are, what we sell, how we sound, where we show up</div>
 
-  <div class="onboarding-hero">
-    <p class="onboarding-lead">Cobalt Intelligence is a B2B data API that pulls real-time business records directly from all 50 US Secretary of State databases, so alternative lenders and fintech platforms can verify, underwrite, and onboard businesses in seconds instead of hours.</p>
-    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/" target="_blank" rel="noopener" class="onboarding-cta">Open full onboarding &rarr;</a>
+    <div class="onboarding-hero">
+      <p class="onboarding-lead">Cobalt Intelligence is a B2B data API that pulls real-time business records directly from all 50 US Secretary of State databases, so alternative lenders and fintech platforms can verify, underwrite, and onboard businesses in seconds instead of hours.</p>
+      <a href="#" onclick="openOnboarding('index.html', 'Welcome'); return false;" class="onboarding-cta">Open full onboarding &rarr;</a>
+    </div>
+
+    <div class="onboarding-grid">
+      <a href="#" onclick="openOnboarding('index.html', 'Welcome'); return false;" class="onboarding-card">
+        <div class="onboarding-num">01</div>
+        <h3>Welcome</h3>
+        <p>What Cobalt does in one sentence, plus how to use this primer.</p>
+        <span class="arrow">Read &rarr;</span>
+      </a>
+      <a href="#" onclick="openOnboarding('company.html', 'Company'); return false;" class="onboarding-card">
+        <div class="onboarding-num">02</div>
+        <h3>Company</h3>
+        <p>Who we are, who we serve, and how we position against competitors.</p>
+        <span class="arrow">Read &rarr;</span>
+      </a>
+      <a href="#" onclick="openOnboarding('team.html', 'Team'); return false;" class="onboarding-card">
+        <div class="onboarding-num">03</div>
+        <h3>Team</h3>
+        <p>The people behind Cobalt and how the marketing function fits in.</p>
+        <span class="arrow">Read &rarr;</span>
+      </a>
+      <a href="#" onclick="openOnboarding('product.html', 'Product'); return false;" class="onboarding-card">
+        <div class="onboarding-num">04</div>
+        <h3>Product</h3>
+        <p>The API suite, the data we deliver, and why customers pick us.</p>
+        <span class="arrow">Read &rarr;</span>
+      </a>
+      <a href="#" onclick="openOnboarding('brand.html', 'Brand'); return false;" class="onboarding-card">
+        <div class="onboarding-num">05</div>
+        <h3>Brand</h3>
+        <p>Voice, tone, colors, and typography. What &ldquo;sounds like Cobalt.&rdquo;</p>
+        <span class="arrow">Read &rarr;</span>
+      </a>
+      <a href="#" onclick="openOnboarding('channels.html', 'Channels'); return false;" class="onboarding-card">
+        <div class="onboarding-num">06</div>
+        <h3>Channels</h3>
+        <p>Where we publish: website, blog, newsletter, LinkedIn, YouTube.</p>
+        <span class="arrow">Read &rarr;</span>
+      </a>
+      <a href="#" onclick="openOnboarding('resources.html', 'Resources'); return false;" class="onboarding-card">
+        <div class="onboarding-num">07</div>
+        <h3>Resources</h3>
+        <p>Bookmarks, links, and quick references to keep handy.</p>
+        <span class="arrow">Read &rarr;</span>
+      </a>
+    </div>
   </div>
 
-  <div class="onboarding-grid">
-    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/index.html" target="_blank" rel="noopener" class="onboarding-card">
-      <div class="onboarding-num">01</div>
-      <h3>Welcome</h3>
-      <p>What Cobalt does in one sentence, plus how to use this primer.</p>
-      <span class="arrow">Read &rarr;</span>
-    </a>
-    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/company.html" target="_blank" rel="noopener" class="onboarding-card">
-      <div class="onboarding-num">02</div>
-      <h3>Company</h3>
-      <p>Who we are, who we serve, and how we position against competitors.</p>
-      <span class="arrow">Read &rarr;</span>
-    </a>
-    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/team.html" target="_blank" rel="noopener" class="onboarding-card">
-      <div class="onboarding-num">03</div>
-      <h3>Team</h3>
-      <p>The people behind Cobalt and how the marketing function fits in.</p>
-      <span class="arrow">Read &rarr;</span>
-    </a>
-    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/product.html" target="_blank" rel="noopener" class="onboarding-card">
-      <div class="onboarding-num">04</div>
-      <h3>Product</h3>
-      <p>The API suite, the data we deliver, and why customers pick us.</p>
-      <span class="arrow">Read &rarr;</span>
-    </a>
-    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/brand.html" target="_blank" rel="noopener" class="onboarding-card">
-      <div class="onboarding-num">05</div>
-      <h3>Brand</h3>
-      <p>Voice, tone, colors, and typography. What &ldquo;sounds like Cobalt.&rdquo;</p>
-      <span class="arrow">Read &rarr;</span>
-    </a>
-    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/channels.html" target="_blank" rel="noopener" class="onboarding-card">
-      <div class="onboarding-num">06</div>
-      <h3>Channels</h3>
-      <p>Where we publish: website, blog, newsletter, LinkedIn, YouTube.</p>
-      <span class="arrow">Read &rarr;</span>
-    </a>
-    <a href="https://cobalt-intelligence.github.io/cobalt-onboarding/resources.html" target="_blank" rel="noopener" class="onboarding-card">
-      <div class="onboarding-num">07</div>
-      <h3>Resources</h3>
-      <p>Bookmarks, links, and quick references to keep handy.</p>
-      <span class="arrow">Read &rarr;</span>
-    </a>
+  <div id="onboarding-viewer" style="display:none;">
+    <div class="onboarding-viewer-bar">
+      <button type="button" class="onboarding-back" onclick="closeOnboarding()">&larr; Back to overview</button>
+      <span class="onboarding-viewer-title" id="onboarding-viewer-title"></span>
+      <a href="#" id="onboarding-viewer-external" class="onboarding-viewer-external" target="_blank" rel="noopener">Open in new tab &#8599;</a>
+    </div>
+    <iframe id="onboarding-iframe" title="Cobalt Onboarding" src="about:blank"></iframe>
   </div>
 </div>
 
@@ -644,6 +702,23 @@ function switchTab(tabId) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + tabId).classList.add('active');
   document.querySelector('[data-tab="' + tabId + '"]').classList.add('active');
+}
+
+const ONBOARDING_BASE = "https://cobalt-intelligence.github.io/cobalt-onboarding/";
+function openOnboarding(page, label) {
+  const url = ONBOARDING_BASE + page;
+  document.getElementById("onboarding-overview").style.display = "none";
+  const viewer = document.getElementById("onboarding-viewer");
+  viewer.style.display = "block";
+  document.getElementById("onboarding-iframe").src = url;
+  document.getElementById("onboarding-viewer-title").textContent = label;
+  document.getElementById("onboarding-viewer-external").href = url;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function closeOnboarding() {
+  document.getElementById("onboarding-viewer").style.display = "none";
+  document.getElementById("onboarding-iframe").src = "about:blank";
+  document.getElementById("onboarding-overview").style.display = "block";
 }
 
 
