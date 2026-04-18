@@ -461,57 +461,10 @@ table.kpi-table td:nth-child(2) { white-space: normal; max-width: 360px; }
 <!-- ==================== SEO TAB ==================== -->
 <div id="tab-seo" class="tab-content active">
   <div class="section-title">SEO Performance</div>
-  <div class="section-sub" id="seo-sub">Live from SEO KPI Tracker 2026</div>
-
-  <div class="toggle" id="seo-toggle">
-    <button id="btn-weekly" class="active" onclick="setSeoView('weekly')">Weekly</button>
-    <button id="btn-monthly" onclick="setSeoView('monthly')">Monthly</button>
-    <button id="btn-yoy" onclick="setSeoView('yoy')">Year-over-Year</button>
-    <button id="btn-wg-booked" onclick="setSeoView('wg-booked')">Booked Grid</button>
-    <button id="btn-wg-accounts" onclick="setSeoView('wg-accounts')">Accounts Grid</button>
-  </div>
-
-  <div id="seo-loading" class="loading">Loading SEO data...</div>
-  <div id="seo-dashboard" style="display:none;">
-    <div id="seo-weekgrid-view" style="display:none;">
-      <h3 id="seo-weekgrid-title" style="margin:0 0 12px; color:var(--navy);"></h3>
-      <div class="legend">
-        <span><span class="dot peak-light"></span>Row peak week</span>
-        <span><span class="dot peak-solid"></span>Year top month</span>
-      </div>
-      <div class="table-card" style="margin-top:0;">
-        <table class="week-grid">
-          <thead id="seo-weekgrid-head"></thead>
-          <tbody id="seo-weekgrid-body"></tbody>
-        </table>
-      </div>
-    </div>
-    <div id="seo-yoy-view" style="display:none;">
-      <h3 style="margin:0 0 12px; color:var(--navy);">Year-over-Year: Booked Calls &amp; Created Accounts</h3>
-      <div class="legend">
-        <span><span class="dot peak-light"></span>Year peak</span>
-        <span><span class="dot low"></span>Year low</span>
-      </div>
-      <div class="yoy-grid" id="seo-yoy-grid"></div>
-    </div>
-    <div id="seo-standard-view">
-      <div class="kpi-grid" id="seo-kpis"></div>
-      <div class="chart-grid">
-        <div class="chart-card"><h3>Total Users</h3><canvas id="seo-chart-users"></canvas></div>
-        <div class="chart-card"><h3>Sessions</h3><canvas id="seo-chart-sessions"></canvas></div>
-        <div class="chart-card"><h3>Page Views</h3><canvas id="seo-chart-views"></canvas></div>
-        <div class="chart-card"><h3>Booked Calls &amp; Created Accounts</h3><canvas id="seo-chart-conv"></canvas></div>
-      </div>
-      <div class="table-card">
-        <h3 id="seo-table-title">Data Table</h3>
-        <table class="kpi-table">
-          <thead><tr id="seo-table-head"></tr></thead>
-          <tbody id="seo-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="status" id="seo-status"></div>
-  </div>
+  <div class="section-sub">Mirrored from Life Dashboard · <a href="https://laladim.github.io/life-dashboard-site/seo-kpi-dashboard.html" target="_blank" rel="noopener" style="color:var(--purple); text-decoration:none;">Open in new tab &#8599;</a></div>
+  <iframe src="https://laladim.github.io/life-dashboard-site/seo-kpi-dashboard.html"
+          title="SEO KPI Dashboard"
+          style="width:100%; height:calc(100vh - 200px); min-height:700px; border:1px solid var(--border); border-radius:12px; background:var(--bg-light); box-shadow:0 1px 3px rgba(15,23,42,0.04); margin-top:16px;"></iframe>
 </div>
 
 <!-- ==================== NEWSLETTER TAB ==================== -->
@@ -956,7 +909,7 @@ function renderNlTable() {
 /* ==========================
    INIT ALL TABS
    ========================== */
-initSeo();
+// initSeo();  // SEO tab now uses iframe to laladim.github.io/life-dashboard-site/seo-kpi-dashboard.html
 initNewsletter();
 </script>
 </body>
