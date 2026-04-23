@@ -455,6 +455,7 @@ table.kpi-table td:nth-child(2) { white-space: normal; max-width: 360px; }
 <nav class="tab-bar">
   <button class="tab-btn active" data-tab="seo" onclick="switchTab('seo')">SEO</button>
   <button class="tab-btn" data-tab="newsletter" onclick="switchTab('newsletter')">Newsletter</button>
+  <button class="tab-btn" data-tab="youtube" onclick="switchTab('youtube')">YouTube</button>
   <button class="tab-btn" data-tab="onboarding" onclick="switchTab('onboarding')">Onboarding</button>
 </nav>
 
@@ -495,6 +496,15 @@ table.kpi-table td:nth-child(2) { white-space: normal; max-width: 360px; }
     <div class="status" id="nl-status"></div>
   </div>
   <div id="nl-error" class="err" style="display:none;"></div>
+</div>
+
+<!-- ==================== YOUTUBE TAB ==================== -->
+<div id="tab-youtube" class="tab-content">
+  <div class="section-title">YouTube Performance</div>
+  <div class="section-sub">Live from YouTube KPI Dashboard</div>
+  <iframe src="https://laladim.github.io/life-dashboard-site/youtube-kpi-dashboard.html"
+          title="YouTube KPI Dashboard"
+          style="width:100%; height:calc(100vh - 200px); min-height:700px; border:1px solid var(--border); border-radius:12px; background:var(--bg-light); box-shadow:0 1px 3px rgba(15,23,42,0.04); margin-top:16px;"></iframe>
 </div>
 
 <!-- ==================== ONBOARDING TAB ==================== -->
