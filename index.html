@@ -750,13 +750,16 @@ function renderSeo(view) {
 }
 function renderSeoTable(view, all) {
   const rows = all.filter(d => { const dt = parseLabelDate(d.label); return dt && dt >= CUTOFF_2025; });
-  const pl = view === "weekly" ? "Week Starting" : "Month";
-  document.getElementById("seo-table-title").textContent = `Data Table \u00B7 Jan 2025 \u2013 Present (${view === "weekly" ? "Weekly" : "Monthly"})`;
-  document.getElementById("seo-table-head").innerHTML = `<th>${pl}</th><th>Total Users</th><th>New Users</th><th>Sessions</th><th>Page Views</th><th>Booked Calls</th><th>Created Accounts</th>`;
+  const isWeekly = view === "weekly";
+  document.getElementById("seo-table-title").textContent = `Data Table \u00B7 Jan 2025 \u2013 Present (${isWeekly ? "Weekly" : "Monthly"})`;
+  document.getElementById("seo-table-head").innerHTML = isWeekly
+    ? `<th>Week Starting</th><th>Week Ending</th><th>Total Users</th><th>New Users</th><th>Sessions</th><th>Page Views</th><th>Booked Calls</th><th>Created Accounts</th>`
+    : `<th>Month</th><th>Total Users</th><th>New Users</th><th>Sessions</th><th>Page Views</th><th>Booked Calls</th><th>Created Accounts</th>`;
   document.getElementById("seo-table-body").innerHTML = rows.slice().reverse().map(r => {
     const dt = parseLabelDate(r.label);
     const bg = dt ? MONTH_COLORS_IDX[dt.getMonth()] : "transparent";
-    return `<tr style="background:${bg};"><td>${r.label}</td><td>${fmt(r.totalUsers)}</td><td>${fmt(r.newUsers)}</td><td>${fmt(r.sessions)}</td><td>${fmt(r.views)}</td><td>${fmt(r.bookedCall)}</td><td>${fmt(r.createdAccount)}</td></tr>`;
+    const endCell = isWeekly ? `<td>${r.endDate || ""}</td>` : "";
+    return `<tr style="background:${bg};"><td>${r.label}</td>${endCell}<td>${fmt(r.totalUsers)}</td><td>${fmt(r.newUsers)}</td><td>${fmt(r.sessions)}</td><td>${fmt(r.views)}</td><td>${fmt(r.bookedCall)}</td><td>${fmt(r.createdAccount)}</td></tr>`;
   }).join("");
 }
 function renderSeoWeekGrid(metric) {
@@ -840,7 +843,7 @@ async function initSeo() {
   try {
     const [w,m] = await Promise.all([fetchCSV(SEO_WEEKLY_CSV), fetchCSV(SEO_MONTHLY_CSV)]);
     seoWeekly = parseSeoWeekly(w); seoMonthly = parseSeoMonthly(m);
-    if(seoWeekly.length){const last=parseLabelDate(seoWeekly[seoWeekly.length-1].label);if(last)document.getElementById("seo-sub").textContent=`Latest: ${last.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}`;}
+    if(seoWeekly.length){const lw=seoWeekly[seoWeekly.length-1];const last=parseLabelDate(lw.endDate||lw.label);if(last)document.getElementById("seo-sub").textContent=`Latest: ${last.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}`;}
     document.getElementById("seo-loading").style.display="none";
     document.getElementById("seo-dashboard").style.display="block";
     renderSeo("weekly");
